@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Resize Gambar</title>
+  <style>
+    body {
+      background-color: white;
+      text-align: center;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    #preview {
+      max-width: 300px;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      color: white;
+      cursor: pointer;
+      margin: 10px;
+      font-size: 16px;
+    }
+    #uploadBtn {
+      background-color: black;
+    }
+    #processBtn {
+      background-color: blue;
+    }
+    #downloadBtn {
+      background-color: green;
+      display: none;
+    }
+    #scaleInput {
+      color: black;
+      font-size: 16px;
+      margin: 10px;
+    }
+    canvas {
+      margin-top: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+  <h2>Resize Gambar</h2>
+  <input type="file" id="fileInput" accept="image/*">
+  <br>
+  <button class="btn" id="uploadBtn">Pilih Gambar</button>
+  <br>
+  <label for="scaleInput" style="color: black;">Ukuran (%) :</label>
+  <input type="number" id="scaleInput" value="50" min="1" max="100">%
+  <br>
+  <button class="btn" id="processBtn">Lanjut</button>
+  <br>
+  <img id="preview" src="" alt="Preview" hidden>
+  <canvas id="canvas" hidden></canvas>
+  <br>
+  <a id="downloadBtn" class="btn" download="gambar_dikecilkan.png">Download</a>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const processBtn = document.getElementById('processBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const scaleInput = document.getElementById('scaleInput');
+
+    // Klik tombol upload = buka file input
+    uploadBtn.onclick = () => fileInput.click();
+
+    // Preview gambar setelah dipilih
+    fileInput.onchange = () => {
+      const file = fileInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          preview.src = e.target.result;
+          preview.hidden = false;
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    // Resize dan tampilkan
+    processBtn.onclick = () => {
+      if (!preview.src) return alert('Pilih gambar dulu!');
+      const scalePercent = parseInt(scaleInput.value);
+      if (isNaN(scalePercent) || scalePercent <= 0 || scalePercent > 100) {
+        return alert('Masukkan angka 1–100 untuk ukuran persentase!');
+      }
+
+      const img = new Image();
+      img.onload = () => {
+        const scale = scalePercent / 100;
+        const width = img.width * scale;
+        const height = img.height * scale;
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.hidden = false;
+
+        const dataURL = canvas.toDataURL('image/png');
+        downloadBtn.href = dataURL;
+        downloadBtn.style.display = 'inline-block';
+      };
+      img.src = preview.src;
+    };
+  </script>
+</body>
+</html>
